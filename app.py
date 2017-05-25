@@ -254,7 +254,7 @@ def getEnglishDayWord(day_word):
         u"내일":"Tomorrow",
         u"명일":"Tomorrow",
         u"모레":"The day after tomorrow",
-        u"내일모레":"The days after tomorrow",
+        u"내일모레":"The day after tomorrow",
         u"글피":"Two days after tommorrow",
         u"그글피":"Three days after tomorrow",
         u"그그글피":"Four days after tomorrow"    
