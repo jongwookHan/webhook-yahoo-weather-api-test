@@ -77,8 +77,8 @@ def makeYqlQuery(req):
 
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
-
-    now_str = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+    #(a>b) and x or y
+    now_str = (now_tuple.tm_mday < 10) and (str(0) + str(now_tuple.tm_mday)) or (str(now_tuple.tm_mday))+ " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
     day_str = getDateStrFromParameter(req)
     
     if now_str == day_str:
