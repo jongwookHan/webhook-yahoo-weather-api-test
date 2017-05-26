@@ -217,7 +217,8 @@ def getDateStrFromParameter(req):
             year = now_tuple.tm_year
         else:
             year = year.replace("년","")
-        
+        if day < 10:
+            day = str(0) + str(day)
         day = str(day) + " " + getMonthName(int(month)) + " " + str(year)
         
         date_word = day     
