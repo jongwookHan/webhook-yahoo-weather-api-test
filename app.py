@@ -54,7 +54,8 @@ def processRequest(req):
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
 
-    now_str = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+    now_str = (now_tuple.tm_mday < 10) and (str(0) + str(now_tuple.tm_mday)) or (str(now_tuple.tm_mday))+ " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+    
     day_str = getDateStrFromParameter(req)
     
     if now_str == day_str:
@@ -85,7 +86,7 @@ def makeYqlQuery(req):
         query = "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "') and u='c'"
     else:
         query = "select item.forecast, location from weather.forecast where woeid in (select woeid from geo.places(1) where text='"+ city +"') and u='c' and item.forecast.date='" + day_str +"'"
-        
+    
     return query
 
 
@@ -217,9 +218,7 @@ def getDateStrFromParameter(req):
             year = now_tuple.tm_year
         else:
             year = year.replace("년","")
-        if day < 10:
-            day = str(0) + str(day)
-        day = str(day) + " " + getMonthName(int(month)) + " " + str(year)
+        day = ((int(day) < 10) and (str(0) + str(day)) or (str(day))) + " " + getMonthName(int(month)) + " " + str(year)
         
         date_word = day     
     return day
@@ -260,4 +259,4 @@ if __name__ == '__main__':
 
     print("Starting app on port %d" % port)
 
-    app.run(debug=False, port=port, host='0.0.0.0')
+    app.run(debug=False, port=port, host='127.0.0.1')
