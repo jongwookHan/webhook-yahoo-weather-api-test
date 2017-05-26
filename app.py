@@ -1,4 +1,4 @@
-#-*-coding:utf-8-*-
+# coding: utf8
 #!/usr/bin/env python
 
 from __future__ import print_function
@@ -42,133 +42,51 @@ def webhook():
 def processRequest(req):
     if req.get("result").get("action") != "yahooWeatherForecast":
         return {}
+    baseurl = "https://query.yahooapis.com/v1/public/yql?"
     
-    baseurl = "http://query.yahooapis.com/v1/public/yql?"
-    
-   
+    yql_query = makeYqlQuery(req)
+    if yql_query is None:
+        return {}
+    yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
+    result = urlopen(yql_url).read()    
+    data = json.loads(result)
     
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
-    now_date = str(now_tuple.tm_mday) + " " + getMonthName(int(now_tuple.tm_mon)) + " " + str(now_tuple.tm_year)
+
+    now_str = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+    day_str = getDateStrFromParameter(req)
     
-    parameter_date = getDateFromParameter(req)
-    
-    if now_date == parameter_date:
-        yql_query = makeYqlQuery(req)
-    else:
-        yql_query = makeForecastYqlQuery(req)
-        
-    if yql_query is None:
-        return {}
-    
-    yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
-    result = urlopen(yql_url).read()
-    data = json.loads(result)
-    
-    
-    if now_date == parameter_date:
+    if now_str == day_str:
         res = makeWebhookResult(data)
     else:
-        res = makeWebhookForecastResult(data)
-    
+        res = makeWebhookForecastResult(data)   
+
     return res
 
 
 def makeYqlQuery(req):
     result = req.get("result")
     parameters = result.get("parameters")
-    city = parameters.get("lc_city")
+    city = parameters.get("lc-city")
     if city is None:
-        city = parameters.get("lc_wcity")
-        if city is None:
+        city = parameters.get("lc-wcity")
+        if(city is None):
             return None
         return city
 
-    return "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "') and u='c'"
-
-def makeForecastYqlQuery(req):
-    result = req.get("result")
-    parameters = result.get("parameters")
-    city = parameters.get("lc_city")
-    if city is None:
-        city = parameters.get("lc_wcity")
-        if city is None:
-            return None
-        return city
-    
-    parameter_date = getDateFromParameter(req)
-    
-    return "select item.forecast, location from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "') and u='c' and item.forecast.date=" + "'" + parameter_date + "'"
-    
-
-def getDateFromParameter(req):    
-    day_word_map = {
-        u"오늘":0,
-        u"금일":0,
-        u"내일":1,
-        u"명일":1,
-        u"모레":2,
-        u"내일모레":2,
-        u"글피":3,
-        u"그글피":4,
-        u"그그글피":5        
-    }
-    
-    result = req.get("result")
-    parameters = result.get("parameters")
-    
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
+
+    now_str = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+    day_str = getDateStrFromParameter(req)
     
-    day = parameters.get("dt_day")
-    if day is None:
-        day = now_tuple.tm_mday
+    if now_str == day_str:
+        query = "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "') and u='c'"
     else:
-        if day in day_word_map:
-            compare_day = now + datetime.timedelta(days=day_word_map[day])
-            compare_day_tuple = compare_day.timetuple()
-            
-            global date_word
-            date_word = getEnglishDayWord(day)
-            
-            return str(compare_day_tuple.tm_mday) + " " + getMonthName(int(compare_day_tuple.tm_mon)) + " " + str(compare_day_tuple.tm_year)
-        else:
-            day = day.replace("일","")
-
-    month = parameters.get("dt_month")
-    if month is None:
-        month = now_tuple.tm_mon
-    else:
-        month = month.replace("월","")
-    
-    year = parameters.get("dt_year")
-    if year is None:
-        year = now_tuple.tm_year
-    else:
-        year = year.replace("년","")
- 
-    global date_word
-    date_word = str(day) + " " + getMonthName(int(month)) + " " + str(year)
- 
-    return str(day) + " " + getMonthName(int(month)) + " " + str(year)
-
-def getMonthName(month):
-    month_map = {
-        1:"Jan",
-        2:"Feb",
-        3:"Mar",
-        4:"Apr",
-        5:"May",
-        6:"Jun",
-        7:"Jul",
-        8:"Aug",
-        9:"Sep",
-        10:"Oct",
-        11:"Nov",
-        12:"Dec"
-    }
-    return month_map[month]
-
+        query = "select item.forecast, location from weather.forecast where woeid in (select woeid from geo.places(1) where text='"+ city +"') and u='c' and item.forecast.date='" + day_str +"'"
+        
+    return query
 
 
 def makeWebhookResult(data):
@@ -204,17 +122,16 @@ def makeWebhookResult(data):
 
     return {
         "speech": speech,
-        "displayText": speech,
-        #"data": data,
+        "displayText": speech
+        # "data": data,
         # "contextOut": [],
-        "source": ""
     }
 
 def makeWebhookForecastResult(data):
     query = data.get('query')
     if query is None:
         return {}
-
+    
     result = query.get('results')
     if result is None:
         return {}
@@ -223,33 +140,109 @@ def makeWebhookForecastResult(data):
     if channel is None:
         return {}
 
-    item = channel.get('item')
-    location = channel.get('location')
-    if (location is None) or (item is None):
+    item = channel.get('item')   
+    if item is None:
         return {}
-
+    
+    location = channel.get('location')
+    if location is None:
+        return {}
+    
     forecast = item.get('forecast')
     if forecast is None:
         return {}
-
-    # print(json.dumps(item, indent=4))
-
-    speech = date_word + " in " + location.get('city') + ": " + forecast.get("text") +  ". the highs is " + forecast.get("high") + " and the lows is " + forecast.get("low")
-
+    
+    date = forecast.get('date')
+    city = location.get('city')
+    ###str(date) + " in " + str(city) + " : " + str(forecast.get('text'))
+    speech = str(date_word) + " in " + str(city) + " : " + str(forecast.get('text')) + ". the highs is " + str(forecast.get('high')) + " C and the lows is " + str(forecast.get('low')) + " C"
+    
     print("Response:")
     print(speech)
-
+    
     return {
         "speech": speech,
-        "displayText": speech,
-        #"data": data,
-        # "contextOut": [],
-        "source": ""
+        "displayText": speech
     }
 
-def getEnglishDayWord(day_word):
-    english_day_word_map = {
-        u"오늘":"Today",
+
+def getDateStrFromParameter(req):
+    result = req.get("result")
+    parameters = result.get("parameters")
+    
+    global date_word
+    
+    day_word_map = {
+        u"오늘":0,
+        u"금일":0,
+        u"내일":1,
+        u"명일":1,
+        u"모레":2,
+        u"내일모레":2,
+        u"글피":3,
+        u"그글피":4,
+        u"그그글피":5        
+    }
+    
+    day = parameters.get("dt_day")
+    if day is None:
+        now = datetime.datetime.now()
+        now_tuple = now.timetuple()
+        day = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+        return day
+    
+    day = unicode(day)
+    
+    if (day in day_word_map) is True:
+        now = datetime.datetime.now()
+        parameter_day = now + datetime.timedelta(days=int(day_word_map[day]))
+        parameter_day_tuple = parameter_day.timetuple()
+        
+        date_word = getEnglishDateName(day)
+        
+        day = str(parameter_day_tuple.tm_mday) + " " + getMonthName(parameter_day_tuple.tm_mon) + " " + str(parameter_day_tuple.tm_year)
+    else:
+        now = datetime.datetime.now()
+        now_tuple = now.timetuple()
+        day = day.replace("일","")
+        
+        month = parameters.get("dt_month")
+        if month is None:
+            month = now_tuple.tm_mon
+        else:
+            month = month.replace("월","")
+        
+        year = parameters.get("dt_year")
+        if year is None:
+            year = now_tuple.tm_year
+        else:
+            year = year.replace("년","")
+        
+        day = str(day) + " " + getMonthName(int(month)) + " " + str(year)
+        
+        date_word = day     
+    return day
+
+def getMonthName(month):
+    month_map = {
+        1 :'Jan',
+        2 :'Feb',
+        3 :'Mar',
+        4 :'Apr',
+        5 :'May',
+        6 :'Jun',
+        7 :'Jul',
+        8 :'Aug',
+        9 :'Sep',
+        10:'Oct',
+        11:'Nov',
+        12:'Dec'       
+    }
+    return month_map[month]     
+
+def getEnglishDateName(date_word):
+    day_map = {
+       u"오늘":"Today",
         u"금일":"Today",
         u"내일":"Tomorrow",
         u"명일":"Tomorrow",
@@ -259,12 +252,7 @@ def getEnglishDayWord(day_word):
         u"그글피":"Three days after tomorrow",
         u"그그글피":"Four days after tomorrow"    
     }
-    
-    if day_word in english_day_word_map:
-        return english_day_word_map[day_word]
-    else:
-        return day_word
-
+    return day_map[date_word]
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
