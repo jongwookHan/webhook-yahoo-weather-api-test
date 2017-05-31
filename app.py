@@ -386,7 +386,6 @@ def getDateStrFromParameter(req):
         parameter_day_tuple = parameter_day.timetuple()
         
         date_word = getEnglishDateName(day)
-       
         day = ((parameter_day_tuple.tm_mday < 10) and (str(0) + str(parameter_day_tuple.tm_mday)) or (str(parameter_day_tuple.tm_mday))) + " " + getMonthName(parameter_day_tuple.tm_mon) + " " + str(parameter_day_tuple.tm_year)
     else:
         now = datetime.datetime.now()
@@ -449,7 +448,5 @@ def getEnglishDateName(date_word):
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
-
     print("Starting app on port %d" % port)
-    
     app.run(debug=False, port=port, host='0.0.0.0')
