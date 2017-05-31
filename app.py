@@ -69,9 +69,9 @@ def processRequest(req):
 def makeYqlQuery(req):
     result = req.get("result")
     parameters = result.get("parameters")
-    city = parameters.get("lc_city")
+    city = parameters.get("sys_lc_city")
     if city is None:
-        city = parameters.get("lc_wcity")
+        city = parameters.get("sys_lc_wcity")
         if(city is None):
             return None
 
@@ -186,7 +186,7 @@ def getDateStrFromParameter(req):
         u"그그글피":5        
     }
     
-    day = parameters.get("dt_day")
+    day = parameters.get("sys_dt_day")
     if day is None:
         now = datetime.datetime.now()
         now_tuple = now.timetuple()
@@ -207,13 +207,13 @@ def getDateStrFromParameter(req):
         now_tuple = now.timetuple()
         day = day.replace("일","")
         
-        month = parameters.get("dt_month")
+        month = parameters.get("sys_dt_month")
         if month is None:
             month = now_tuple.tm_mon
         else:
             month = month.replace("월","")
         
-        year = parameters.get("dt_year")
+        year = parameters.get("sys_dt_year")
         if year is None:
             year = now_tuple.tm_year
         else:
