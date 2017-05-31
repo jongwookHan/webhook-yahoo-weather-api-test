@@ -188,7 +188,7 @@ def getDateStrFromParameter(req):
     if day is None:
         now = datetime.datetime.now()
         now_tuple = now.timetuple()
-        day = str(now_tuple.tm_mday) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
+        day = (now_tuple.tm_mday < 10) and (str(0) + str(now_tuple.tm_mday)) or (str(now_tuple.tm_mday)) + " " + getMonthName(now_tuple.tm_mon) + " " + str(now_tuple.tm_year)
         return day
     
     day = unicode(day)
@@ -199,8 +199,8 @@ def getDateStrFromParameter(req):
         parameter_day_tuple = parameter_day.timetuple()
         
         date_word = getEnglishDateName(day)
-        
-        day = str(parameter_day_tuple.tm_mday) + " " + getMonthName(parameter_day_tuple.tm_mon) + " " + str(parameter_day_tuple.tm_year)
+       
+        day = (parameter_day_tuple.tm_mday < 10) and (str(0) + str(parameter_day_tuple.tm_mday)) or (str(parameter_day_tuple.tm_mday)) + " " + getMonthName(parameter_day_tuple.tm_mon) + " " + str(parameter_day_tuple.tm_year)
     else:
         now = datetime.datetime.now()
         now_tuple = now.timetuple()
