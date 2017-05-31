@@ -74,7 +74,6 @@ def makeYqlQuery(req):
         city = parameters.get("lc_wcity")
         if(city is None):
             return None
-        return city
 
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
