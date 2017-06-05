@@ -158,7 +158,6 @@ def makeWebhookForecastResult(data):
     date = forecast.get('date')
     city = unicode(global_city)
     ###str(date) + " in " + str(city) + " : " + str(forecast.get('text'))
-    print(getKoreanWeatherCondition(forecast.get('text')))
     speech = str(date_word) +" " + str(city) + u" 날씨는 " + getKoreanWeatherCondition(forecast.get('code')) + u"이고, 최고기온은 " + str(forecast.get('high')) + u" C , 최저기온은 " + str(forecast.get('low')) + u" C 입니다."
     
     print("Response:")
@@ -327,4 +326,4 @@ def getEnglishDateName(date_word):
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port %d" % port)
-    app.run(debug=False, port=port, host='0.0.0.0')
+    app.run(debug=False, port=port, host='127.0.0.1')
