@@ -74,6 +74,9 @@ def makeYqlQuery(req):
         city = parameters.get("sys_lc_wcity")
         if(city is None):
             return None
+    global global_city
+    global_city = city
+    
 
     now = datetime.datetime.now()
     now_tuple = now.timetuple()
@@ -114,8 +117,7 @@ def makeWebhookResult(data):
 
     # print(json.dumps(item, indent=4))
 
-    speech = "Today in " + location.get('city') + ": " + condition.get('text') + \
-             ", the temperature is " + condition.get('temp') + " " + units.get('temperature')
+    speech = "오늘 " + global_city + " 날씨는 " + getKoreanWeatherCondition(condition.get('text')) + "이고, 기온은 " + condition.get('temp') + " " + units.get('temperature') + " 입니다."
 
     print("Response:")
     print(speech)
@@ -154,9 +156,10 @@ def makeWebhookForecastResult(data):
         return {}
     
     date = forecast.get('date')
-    city = location.get('city')
+    city = unicode(global_city)
     ###str(date) + " in " + str(city) + " : " + str(forecast.get('text'))
-    speech = str(date_word) + " in " + str(city) + " : " + str(forecast.get('text')) + ". the highs is " + str(forecast.get('high')) + " C and the lows is " + str(forecast.get('low')) + " C"
+    print(getKoreanWeatherCondition(forecast.get('text')))
+    speech = str(date_word) +" " + str(city) + u" 날씨는 " + getKoreanWeatherCondition(forecast.get('text')) + u"이고, 최고기온은 " + str(forecast.get('high')) + u" C , 최저기온은 " + str(forecast.get('low')) + u" C 입니다."
     
     print("Response:")
     print(speech)
@@ -201,23 +204,28 @@ def getDateStrFromParameter(req):
         parameter_day = now + datetime.timedelta(days=int(day_word_map[day]))
         parameter_day_tuple = parameter_day.timetuple()
         
-        date_word = getEnglishDateName(day)
+        date_word = day
         day = ((parameter_day_tuple.tm_mday < 10) and (str(0) + str(parameter_day_tuple.tm_mday)) or (str(parameter_day_tuple.tm_mday))) + " " + getMonthName(parameter_day_tuple.tm_mon) + " " + str(parameter_day_tuple.tm_year)
     else:
         now = datetime.datetime.now()
         now_tuple = now.timetuple()
+        
+        date_word = day
+        
         day = day.replace("일","")
         
         month = parameters.get("sys_dt_month")
         if month is None:
             month = now_tuple.tm_mon
         else:
+            date_word = month + " " + date_word
             month = month.replace("월","")
-        
+            
         year = parameters.get("sys_dt_year")
         if year is None:
             year = now_tuple.tm_year
         else:
+            date_word = year + " " + date_word
             year = year.replace("년","")
             
         if int(day) < now_tuple.tm_mday:
@@ -228,7 +236,7 @@ def getDateStrFromParameter(req):
             
         day = ((int(day) < 10) and (str(0) + str(day)) or (str(day))) + " " + getMonthName(int(month)) + " " + str(year)
         
-        date_word = day     
+             
     return day
 
 def getMonthName(month):
@@ -247,6 +255,56 @@ def getMonthName(month):
         12:'Dec'       
     }
     return month_map[month]     
+
+def getKoreanWeatherCondition(weatherCondition):
+    korean_weather_map = {
+        "Tornado":u"토네이도",
+        "Tropical Storm":u"열대성 폭풍",
+        "Hurricane":u"허리케인",
+        "Servere Thunderstorms":u"뇌우 및 진눈깨비",
+        "Thunderstorms":u"뇌우",
+        "Mixed Rain and Snow":u"진눈깨비",
+        "Mixed Rain and Sleet":u"진눈깨비",
+        "Mixed Snow and Sleet":u"진눈깨비",
+        "Freezing Drizzle":u"진눈깨비",
+        "Drizzle":u"이슬비",
+        "Freezing Rain":u"비",
+        "Showers":u"소나기",
+        "Snow Flurries":u"눈",
+        "Light Snow Showers":u"눈소나기",
+        "Blowing Snow":u"눈",
+        "Snow":u"눈",
+        "Hail":u"우박",
+        "Sleet":u"진눈깨비",
+        "Dust":u"먼지많음",
+        "Foggy":u"안개",
+        "Haze":u"옅은 안개",
+        "Smoky":u"짙은 안개",
+        "Blustery":u"강풍",
+        "Windy":u"바람이 많이 붐",
+        "Cold":u"추움",
+        "Cloudy":u"흐림",
+        "Mostly Cloudy (night)":u"밤에는 대체로 흐림",
+        "Mostly Cloudy (day)":u"낮에는 대체로 흐림",
+        "Partly Cloudy (night)":u"밤에는 부분적으로 흐림",
+        "Partly Cloudy (day)":u"낮에는 부분적으로 흐림",
+        "Mostly Cloudy":"대체로 흐림",
+        "Clear (night)":u"밤에는 맑음",
+        "Sunny":u"맑음",
+        "Fair (night)":u"밤에는 갬",
+        "Fair (day)":u"낮에는 갬",
+        "Mixed Rain and Hail":u"진눈깨비",
+        "Hot":u"더움",
+        "Isolated Thunderstorms":u"고립성 뇌우",
+        "Scattered Thunderstorms":u"산발성 뇌우",
+        "Scattered Showers":u"산발성 소나기",
+        "Heavy Snow":u"폭설",
+        "Partly Cloudy":u"부분적 흐림",
+        "Thundershowers":u"소나기(뇌우)",
+        "Snow Thowers":u"눈소나기",
+        "Isolated Thundershowers":u"고립성 소나기(뇌우)"
+    }
+    return korean_weather_map[weatherCondition]
 
 def getEnglishDateName(date_word):
     day_map = {
