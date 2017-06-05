@@ -177,6 +177,7 @@ def getDateStrFromParameter(req):
     day_word_map = {
         u"오늘":0,
         u"금일":0,
+        u"현재":0,
         u"내일":1,
         u"명일":1,
         u"모레":2,
@@ -251,6 +252,7 @@ def getEnglishDateName(date_word):
     day_map = {
        u"오늘":"Today",
         u"금일":"Today",
+        u"현재":"Now",
         u"내일":"Tomorrow",
         u"명일":"Tomorrow",
         u"모레":"The day after tomorrow",
