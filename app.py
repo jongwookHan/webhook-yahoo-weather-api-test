@@ -117,7 +117,7 @@ def makeWebhookResult(data):
 
     # print(json.dumps(item, indent=4))
 
-    speech = "오늘 " + global_city + " 날씨는 " + getKoreanWeatherCondition(condition.get('text')) + "이고, 기온은 " + condition.get('temp') + " " + units.get('temperature') + " 입니다."
+    speech = "오늘 " + global_city + " 날씨는 " + getKoreanWeatherCondition(condition.get('code')) + "이고, 기온은 " + condition.get('temp') + " " + units.get('temperature') + " 입니다."
 
     print("Response:")
     print(speech)
@@ -159,7 +159,7 @@ def makeWebhookForecastResult(data):
     city = unicode(global_city)
     ###str(date) + " in " + str(city) + " : " + str(forecast.get('text'))
     print(getKoreanWeatherCondition(forecast.get('text')))
-    speech = str(date_word) +" " + str(city) + u" 날씨는 " + getKoreanWeatherCondition(forecast.get('text')) + u"이고, 최고기온은 " + str(forecast.get('high')) + u" C , 최저기온은 " + str(forecast.get('low')) + u" C 입니다."
+    speech = str(date_word) +" " + str(city) + u" 날씨는 " + getKoreanWeatherCondition(forecast.get('code')) + u"이고, 최고기온은 " + str(forecast.get('high')) + u" C , 최저기온은 " + str(forecast.get('low')) + u" C 입니다."
     
     print("Response:")
     print(speech)
@@ -258,53 +258,54 @@ def getMonthName(month):
 
 def getKoreanWeatherCondition(weatherCondition):
     korean_weather_map = {
-        "Tornado":u"토네이도",
-        "Tropical Storm":u"열대성 폭풍",
-        "Hurricane":u"허리케인",
-        "Servere Thunderstorms":u"뇌우 및 진눈깨비",
-        "Thunderstorms":u"뇌우",
-        "Mixed Rain and Snow":u"진눈깨비",
-        "Mixed Rain and Sleet":u"진눈깨비",
-        "Mixed Snow and Sleet":u"진눈깨비",
-        "Freezing Drizzle":u"진눈깨비",
-        "Drizzle":u"이슬비",
-        "Freezing Rain":u"비",
-        "Showers":u"소나기",
-        "Snow Flurries":u"눈",
-        "Light Snow Showers":u"눈소나기",
-        "Blowing Snow":u"눈",
-        "Snow":u"눈",
-        "Hail":u"우박",
-        "Sleet":u"진눈깨비",
-        "Dust":u"먼지많음",
-        "Foggy":u"안개",
-        "Haze":u"옅은 안개",
-        "Smoky":u"짙은 안개",
-        "Blustery":u"강풍",
-        "Windy":u"바람이 많이 붐",
-        "Cold":u"추움",
-        "Cloudy":u"흐림",
-        "Mostly Cloudy (night)":u"밤에는 대체로 흐림",
-        "Mostly Cloudy (day)":u"낮에는 대체로 흐림",
-        "Partly Cloudy (night)":u"밤에는 부분적으로 흐림",
-        "Partly Cloudy (day)":u"낮에는 부분적으로 흐림",
-        "Mostly Cloudy":"대체로 흐림",
-        "Clear (night)":u"밤에는 맑음",
-        "Clear":u"맑음",
-        "Sunny":u"맑음",
-        "Fair (night)":u"밤에는 갬",
-        "Fair (day)":u"낮에는 갬",
-        "Fair":u"갬",
-        "Mixed Rain and Hail":u"진눈깨비",
-        "Hot":u"더움",
-        "Isolated Thunderstorms":u"고립성 뇌우",
-        "Scattered Thunderstorms":u"산발성 뇌우",
-        "Scattered Showers":u"산발성 소나기",
-        "Heavy Snow":u"폭설",
-        "Partly Cloudy":u"부분적 흐림",
-        "Thundershowers":u"소나기(뇌우)",
-        "Snow Thowers":u"눈소나기",
-        "Isolated Thundershowers":u"고립성 소나기(뇌우)"
+        "0":u"토네이도",
+        "1 Storm":u"열대성 폭풍",
+        "2":u"허리케인",
+        "3":u"뇌우 및 진눈깨비",
+        "4":u"뇌우",
+        "5":u"진눈깨비",
+        "6":u"진눈깨비",
+        "7":u"진눈깨비",
+        "8":u"진눈깨비",
+        "9":u"이슬비",
+        "10":u"비",
+        "11":u"소나기",
+        "12":u"소나기",
+        "13":u"눈",
+        "14":u"눈소나기",
+        "15":u"눈",
+        "16":u"눈",
+        "17":u"우박",
+        "18":u"진눈깨비",
+        "19":u"먼지많음",
+        "20":u"안개",
+        "21":u"옅은 안개",
+        "22":u"짙은 안개",
+        "23":u"강풍",
+        "24":u"바람이 많이 붐",
+        "25":u"추움",
+        "26":u"흐림",
+        "27":u"밤에는 대체로 흐림",
+        "28":u"낮에는 대체로 흐림",
+        "29":u"밤에는 부분적으로 흐림",
+        "30":u"낮에는 부분적으로 흐림",
+        "31":u"밤에는 맑음",
+        "32":u"맑음",
+        "33":u"밤에는 갬",
+        "34":u"낮에는 갬",
+        "35":u"진눈깨비",
+        "36":u"더움",
+        "37":u"고립성 뇌우",
+        "38":u"산발성 뇌우",
+        "39":u"산발성 뇌우",
+        "40":u"산발성 소나기",
+        "41":u"폭설",
+        "42":u"부분적 눈소나기",
+        "43":u"폭설",
+        "44":u"부분적 흐림",
+        "45":u"소나기(뇌우)",
+        "46":u"눈소나기",
+        "47":u"고립성 소나기(뇌우)"
     }
     return korean_weather_map[weatherCondition]
 
